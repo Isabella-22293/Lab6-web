@@ -13,10 +13,10 @@ services:
     ports:
       - "3378:3306"
   app:
-    build: .
-    depends_on:
-      - mysql
-    links:
-      - mysql
-    ports:
-      - 22293:3000
+      build: .
+      depends_on:
+        - mysql
+      links:
+       - mysql
+      ports:
+        - 22293:3000
