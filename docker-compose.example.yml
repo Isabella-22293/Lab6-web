@@ -1,23 +1,23 @@
 version: '3.8'
 
 services:
-    mysql:
-      image: mysql:latest
-      environment:
-        MYSQL_DATABASE: blog
-        MYSQL_USER: Isabella2207
-        MYSQL_PASSWORD: Isa22293
-        MYSQL_ROOT_PASSWORD: Isa22293
-      volumes:
-        - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql
-      ports:
-        - "3378:3306"
+  mysql:
+    image: mysql:latest
+    environment:
+      MYSQL_DATABASE: blog
+      MYSQL_USER: Isabella2207
+      MYSQL_PASSWORD: Isa22293
+      MYSQL_ROOT_PASSWORD: Isa22293
+    volumes:
+      - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    ports:
+      - "3378:3306"
 
-    app:
-      build: .
-      depends_on:
-        - mysql
-      links:
-        - mysql
-      ports:
-        - "22293:3000" 
+  app:
+    build: .
+    depends_on:
+      - mysql
+    links:
+      - mysql
+    ports:
+      - "22293:3000"
