@@ -1,9 +1,10 @@
 import express from 'express'
-import  {getAllPosts, getpost, createPost} from './db.js'
+import  {getAllPosts, getpost, createPost, createUser, getUser} from './db.js'
 import bodyParser from 'body-parser'
 import swaggerUi from 'swagger-ui-express';
 import swaggerJsdoc from 'swagger-jsdoc';
 import cors from 'cors';
+import {converter, deHashear} from './seguridad.js'
 
 const app = express()
 const port = 3000
@@ -108,10 +109,6 @@ app.use(express.json());
  *                 type: string
  *               content:
  *                 type: string
- *               tipo:
- *                 type: string
- *               Imagen:
- *                 type: string
  *               Preparacion:
  *                 type: string
  *               Descripcion:
@@ -135,14 +132,12 @@ app.post('/posts', async (req, res) => {
     const contenido = nuevoPost.content;
     const hora = new Date();
     const creado = hora.toISOString().slice(0, 19).replace('T', ' ');
-    const tipo = nuevoPost.tipo;
-    const Imagen = nuevoPost.Imagen;
     const Preparacion = nuevoPost.Preparacion;
     const Descripcion = nuevoPost.Descripcion;
     const Ingredientes = nuevoPost.Ingredientes;
-    await createPost(titulo, contenido, creado, tipo, Imagen, Preparacion, Descripcion, Ingredientes);
+    await createPost(titulo, contenido, creado, Preparacion, Descripcion, Ingredientes);
     res.status(200).json(nuevoPost); 
-    if (!nuevoPost.title || !nuevoPost.content || !nuevoPost.tipo) {
+    if (!nuevoPost.title || !nuevoPost.content) {
       return res.status(400).send('Faltan datos obligatorios en el cuerpo de la solicitud');
     }
   } catch (error) {
@@ -175,10 +170,6 @@ app.post('/posts', async (req, res) => {
  *                 type: string
  *               content:
  *                 type: string
- *               tipo:
- *                 type: string
- *               Imagen:
- *                 type: string
  *               Preparacion:
  *                 type: string
  *               Descripcion:
@@ -198,12 +189,12 @@ app.post('/posts', async (req, res) => {
 app.put('/posts/:id', async (req, res) => {
   try {
     const id = req.params.id;
-    const { title, content, tipo, Imagen, Preparacion, Descripcion, Ingredientes } = req.body;
+    const { title, content, Preparacion, Descripcion, Ingredientes } = req.body;
     const hora = new Date();
     const creado = hora.toISOString().slice(0, 19).replace('T', ' ');
-    const post = await createPost(title, content, creado, tipo, Imagen, Preparacion, Descripcion, Ingredientes);
+    const post = await createPost(title, content, creado, Preparacion, Descripcion, Ingredientes);
     res.status(200).json(post);
-    if (!title || !content || !tipo) {
+    if (!title || !content) {
       return res.status(400).send('Faltan datos obligatorios en el cuerpo de la solicitud');
     }
   } catch (error) {
@@ -211,6 +202,39 @@ app.put('/posts/:id', async (req, res) => {
     res.status(500).send('Error interno del servidor');
   }
 });
+
+app.post('/register', async (req, res) => {
+  const {usuario} = req.body
+  const {contraseña} = req.body
+
+  const securePassword = converter(contraseña)
+
+  try {
+    await createUser(usuario, securePassword)
+    res.status(200).json({message: 'usuario creado con exito'})
+  } catch (error) {
+    res.status(500).json({message: 'no se pudo crear el usuario'})
+  }
+})
+
+app.get('/login', async (req, res) => {
+  const {usuario} = req.headers
+  const {contrasena} = req.headers
+  const user = await getUser(usuario)
+  const hash = user[0].contrasena
+
+  if (user.length >0) {
+    const comprobacion = deHashear(contrasena, hash )
+
+    if (comprobacion) {
+      res.status(200).json({message: 'Bienvenido'})
+    } else {
+      res.status(500).json({message: 'Contraseña incorrecta'})
+    }
+  } else {
+    res.status(500).json({message: 'El usuario no existe'})
+  }
+})
 
 const swaggerOptions = {
   swaggerDefinition: {

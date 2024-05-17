@@ -16,7 +16,17 @@ export async function actualizarpost(id) {
 }
 
 
-export async function createPost(title, content, created_at, tipo, Imagen, Preparacion, Descripcion, Ingredientes ) {
-    const [result] = await conn.query('INSERT INTO blog_posts (title, content, created_at, tipo, Imagen, Preparacion, Descripcion, Ingredientes ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [title, content, created_at, tipo, Imagen, Preparacion, Descripcion, Ingredientes])
+export async function createPost(title, content, created_at, Preparacion, Descripcion, Ingredientes ) {
+    const [result] = await conn.query('INSERT INTO blog_posts (title, content, created_at, Preparacion, Descripcion, Ingredientes ) VALUES (?, ?, ?, ?, ?, ?)', [title, content, created_at, Preparacion, Descripcion, Ingredientes])
+    return result
+ }
+
+ export async function createUser(usuario, contraseña ) {
+    const [result] = await conn.query('INSERT INTO login (Usuario, contrasena ) VALUES (?, ?)', [usuario, contraseña])
+    return result
+ }
+
+ export async function getUser(usuario) {
+    const [result] = await conn.query('SELECT * FROM login WHERE Usuario = ?', [usuario])
     return result
  }
